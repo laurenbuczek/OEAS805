@@ -1,0 +1,833 @@
+
+Gemini
+
+New chat
+Library
+Images
+Scheduled
+Students
+Customize
+New notebook
+Grouping Parameter Counts
+Understanding [*] in Jupyter Notebook
+Understanding Pandas DataFrame Correlation Code
+Explaining Pandas DataFrame Info Output
+Daily City Temperature EDA Breakdown
+Fixing Jupyter Nbconvert File Error
+Checking Git Repositories in Windows Terminals
+Fixing Git Add Pathspec Error
+Fixing Git Add Errors
+Fixing Git Remote Origin Error
+Updating Git Remote to SSH
+How to Rename PC Username
+Fixing Git Setup for HW1
+Fixing Git Repository and Push Setup
+Fixing Git Remote Origin Error
+Conversation with Gemini
+I want to see how many paramters I have by grouping them. I only want to check for three diffferent paramters
+
+To group and count parameters across three specific attributes, you can use SQL, Python (pandas), or Excel / Pivot Tables, depending on where your data lives:
+
+Option 1: SQL (Database)
+Use GROUP BY with COUNT(*) specifying your three parameter column names.
+
+SQL
+SELECT 
+    parameter_1,
+    parameter_2,
+    parameter_3,
+    COUNT(*) AS parameter_count
+FROM 
+    your_table_name
+GROUP BY 
+    parameter_1,
+    parameter_2,
+    parameter_3;
+Option 2: Python (Pandas)
+Use .groupby() combined with .size() or .value_counts().
+
+Python
+import pandas as pd
+
+# Group by the 3 parameters and count occurrences
+df_counts = df.groupby(['parameter_1', 'parameter_2', 'parameter_3']).size().reset_index(name='count')
+
+print(df_counts)
+Option 3: Excel or Spreadsheets
+Select your data range.
+
+Go to Insert 
+→ PivotTable.
+
+Drag your 3 parameter columns into the Rows area in the desired hierarchical order.
+
+Drag any unique identifier or one of the parameters into the Values area and set its summary calculation to Count.
+
+Option 4: PyTorch / Deep Learning Models
+If you are asking about grouping trainable parameters in a machine learning model by layer type or parameter group:
+
+Python
+from collections import defaultdict
+
+param_counts = defaultdict(int)
+
+# Example grouping by parameter name/type
+for name, param in model.named_parameters():
+    if "weight" in name:
+        param_counts["weights"] += param.numel()
+    elif "bias" in name:
+        param_counts["biases"] += param.numel()
+    else:
+        param_counts["other"] += param.numel()
+
+for group, count in param_counts.items():
+    print(f"{group}: {count:,} parameters")
+How can I put the data from my large data frame into seperate columns
+
+# Count the measurement values for each selected parameter
+
+df_counts = df[df['Parameter'].isin(['WTEMP', 'CHLA', 'SECCHI'])].groupby(
+
+    'Parameter'
+
+)['MeasureValue'].count().reset_index(name='count')
+
+To get each parameter as its own separate column rather than separate rows, you can pivot the grouped DataFrame using .pivot():
+
+Python
+# 1. Filter and group by Parameter
+df_counts = (
+    df[df['Parameter'].isin(['WTEMP', 'CHLA', 'SECCHI'])]
+    .groupby('Parameter')['MeasureValue']
+    .count()
+    .reset_index(name='count')
+)
+
+# 2. Pivot so each Parameter becomes a column header
+df_counts_wide = df_counts.pivot(columns='Parameter', values='count').reset_index(drop=True)
+
+print(df_counts_wide)
+Alternative: Direct One-Liner (Skip groupby)
+You can skip groupby entirely by using pd.crosstab() or agg() on filtered columns:
+
+Python
+# Using crosstab directly
+df_counts_wide = pd.crosstab(
+    index=0, 
+    columns=df[df['Parameter'].isin(['WTEMP', 'CHLA', 'SECCHI'])]['Parameter']
+).rename_axis(None, axis=1).drop(columns=0, errors='ignore')
+Resulting Output Format
+WTEMP	CHLA	SECCHI
+1450	980	1120
+Parameter CHLA SECCHI WTEMP
+
+0 42.0 NaN NaN
+
+1 NaN 42.0 NaN
+
+2 NaN NaN 42.0
+
+This issue happens because .pivot() uses the DataFrame's existing index (0, 1, 2), placing each parameter on a separate row and filling missing cells with NaN.
+
+Here are three ways to condense all parameter counts into a single row:
+
+Option 1: Direct Transpose using .to_frame().T (Cleanest)
+Skip reset_index(name='count') and transpose (.T) the resulting Series directly into a single-row DataFrame:
+
+Python
+df_counts = (
+    df[df['Parameter'].isin(['WTEMP', 'CHLA', 'SECCHI'])]
+    .groupby('Parameter')['MeasureValue']
+    .count()
+    .to_frame()
+    .T
+    .reset_index(drop=True)
+)
+
+# Optional: removes the 'Parameter' name label above columns
+df_counts.columns.name = None
+
+print(df_counts)
+Option 2: Transpose Your Existing df_counts
+If you already have df_counts with columns ['Parameter', 'count']:
+
+Python
+df_counts_wide = df_counts.set_index('Parameter').T.reset_index(drop=True)
+df_counts_wide.columns.name = None
+
+print(df_counts_wide)
+Option 3: Using .pivot() with a Constant Index
+If using .pivot(), assign a dummy index key so pandas aligns all values into row 0:
+
+Python
+df_counts['key'] = 0
+df_counts_wide = (
+    df_counts.pivot(index='key', columns='Parameter', values='count')
+    .reset_index(drop=True)
+)
+df_counts_wide.columns.name = None
+
+print(df_counts_wide)
+Resulting Output
+CHLA	SECCHI	WTEMP
+42	42	42
+error message
+
+The error happens in line 2: plt.scatter(X_test, y_test, color='red').   
+PNG
+
+This ValueError occurs because X_test and y_test do not have the exact same shape or 1D dimension. This usually happens in machine learning pipelines when X_test is a 2D array/DataFrame with shape (N, 1) or multiple feature columns, while y_test is a 1D vector of shape (N,).   
+PNG
++ 1
+
+How to Fix It
+Flatten X_test (and X_test / y_pred in line 3) to 1D, or select the specific feature column you are plotting:
+
+Solution 1: Flatten X_test using .ravel() or .squeeze()
+If X_test has a single feature column but 2D shape (N, 1):
+
+Python
+# Plot outputs using .ravel() or .squeeze() to ensure 1D arrays
+plt.scatter(X_test.ravel(), y_test, color='red')
+plt.plot(X_test.ravel(), y_pred, '-x', color='blue', linewidth=1)
+plt.xlabel('High-density lipoproteins')
+plt.ylabel('Quant. measure of disease progression 1 yr later')
+plt.show()
+Solution 2: Select the specific column by index/name
+If X_test is a NumPy array or pandas DataFrame containing multiple feature columns, specify the exact feature column for the x-axis:
+
+Python
+# For NumPy arrays (e.g., column index 0)
+plt.scatter(X_test[:, 0], y_test, color='red')
+plt.plot(X_test[:, 0], y_pred, '-x', color='blue', linewidth=1)
+
+# OR for Pandas DataFrames:
+# plt.scatter(X_test['HDL_column_name'], y_test, color='red')
+# plt.plot(X_test['HDL_column_name'], y_pred, '-x', color='blue', linewidth=1)
+
+plt.xlabel('High-density lipoproteins')
+plt.ylabel('Quant. measure of disease progression 1 yr later')
+plt.show()
+I have three different predictor variables
+
+When fitting a model with multiple predictor variables (e.g., 
+X has shape (N, 3)), you cannot directly plot a single 2D trend line against target 
+y because 
+y depends on all 3 variables simultaneously.
+
+Here are the best ways to visualize your data and model performance depending on what you want to achieve:
+
+Method 1: Plot Actual vs. Predicted Values (Recommended)
+The standard way to check performance for multi-variable models is plotting 
+y 
+test
+​
+  vs. 
+y 
+pred
+​
+ . Perfect predictions align on a 
+y=x diagonal line.
+
+Python
+import matplotlib.pyplot as plt
+
+plt.scatter(y_test, y_pred, color='blue', alpha=0.6)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2) # 1:1 reference line
+plt.xlabel('Actual Values (y_test)')
+plt.ylabel('Predicted Values (y_pred)')
+plt.title('Actual vs Predicted Progression')
+plt.show()
+Method 2: Separate Subplots for Each Predictor Variable
+To see how each individual predictor relates to 
+y alongside your predictions:
+
+Python
+import matplotlib.pyplot as plt
+
+# Assuming X_test has 3 columns: feature_0, feature_1, feature_2
+feature_names = ['High-density lipoproteins', 'Feature 2', 'Feature 3']
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+for i in range(3):
+    # Sort by feature values so line plots connect cleanly
+    sort_idx = X_test[:, i].argsort()
+    
+    axes[i].scatter(X_test[:, i], y_test, color='red', alpha=0.5, label='Actual')
+    axes[i].plot(X_test[sort_idx, i], y_pred[sort_idx], color='blue', label='Predicted')
+    axes[i].set_xlabel(feature_names[i])
+    axes[i].set_ylabel('Disease Progression')
+    axes[i].legend()
+
+plt.tight_layout()
+plt.show()
+Method 3: Plot Partial Dependence or Single Feature Scatter
+If you only want to inspect one specific predictor (e.g., High-density lipoproteins at column index 0) against 
+y 
+t
+​
+ est:
+
+Python
+# Select column 0 for X
+plt.scatter(X_test[:, 0], y_test, color='red', label='Actual')
+plt.xlabel('High-density lipoproteins')
+plt.ylabel('Quant. measure of disease progression 1 yr later')
+plt.show()
+nearest neighbors with different scales
+
+When training a k-Nearest Neighbors (k-NN) model (or calculating distances like Euclidean distance), features with larger numerical scales will dominate the distance calculations, making smaller-scale features virtually ignored.
+
+The Problem
+If feature 
+A is measured in thousands (e.g., Income: $50,000) and feature 
+B is measured in small decimals (e.g., Blood Pressure Ratio: 
+0.8), a difference of 
+100 in feature 
+A completely swamps a difference of 
+0.1 in feature 
+B, even if 
+0.1 represents a massive shift.
+
+Key Solutions
+1. Feature Scaling (Recommended)
+Before fitting KNeighborsClassifier or KNeighborsRegressor, scale your feature matrix 
+X:
+
+StandardScaler (Z-score Normalization): Rescales data to have a mean of 0 and a variance of 1. Best when features are roughly normally distributed.
+
+MinMaxScaler: Rescales data to a fixed range, usually 
+[0,1]. Best when you have bounded distributions and no major extreme outliers.
+
+Python
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import make_pipeline
+
+# Use a Pipeline to scale X before fitting k-NN
+model = make_pipeline(
+    StandardScaler(),
+    KNeighborsClassifier(n_neighbors=5)
+)
+
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+2. Scale-Invariant Distance Metrics
+If feature scaling isn't ideal for your workflow, switch from default Euclidean distance to a distance metric designed for correlated or differently scaled variables:
+
+Mahalanobis Distance: Takes into account the variance and covariance of features, effectively scaling features automatically based on dataset structure.
+
+Python
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+
+# Compute the covariance matrix of training features
+cov_matrix = np.cov(X_train, rowvar=False)
+
+# Pass Mahalanobis metric and covariance matrix into k-NN
+knn = KNeighborsClassifier(
+    n_neighbors=5,
+    metric='mahalanobis',
+    metric_params={'VI': np.linalg.inv(cov_matrix)}
+)
+
+knn.fit(X_train, y_train)
+# Generate some mostly linear data with stochastic noise added# This line generates a pandas DataFrame 'x' containing 50 random numbers between 0 and 10 to serve as the input feature.x = pd.DataFrame([10 * random.random() for __ in range(50)])# This line creates the target variable 'y' using a linear equation (2 * x - 1) and adds random noise between 0 and 1 to simulate real-world variance.y = 2 * x - 1 + pd.DataFrame([random.random() for __ in range(50)])# Initiate the KNN regression model, setting its 'k' parameter (number of neighbors) to 'k' that we chose above.model = KNeighborsRegressor(n_neighbors=k)model.fit(x, y)
+
+Here is a clean, fully executable script using your code snippet with scaled input data, fitting the KNeighborsRegressor, and visualizing the predictions alongside the data:
+
+Python
+import random
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+# 1. Generate noisy linear data
+random.seed(42)
+x = pd.DataFrame([10 * random.random() for _ in range(50)], columns=['X'])
+y = 2 * x['X'] - 1 + pd.Series([random.random() for _ in range(50)])
+
+# 2. Build pipeline with StandardScaler and KNeighborsRegressor
+k = 5
+model = make_pipeline(
+    StandardScaler(),
+    KNeighborsRegressor(n_neighbors=k)
+)
+
+# 3. Fit the model
+model.fit(x, y)
+
+# 4. Predict on a continuous range for smooth visualization
+x_grid = pd.DataFrame(np.linspace(0, 10, 200), columns=['X'])
+y_pred = model.predict(x_grid)
+
+# 5. Plot results
+plt.figure(figsize=(8, 5))
+plt.scatter(x, y, color='red', alpha=0.7, label='Actual Data Points')
+plt.plot(x_grid, y_pred, color='blue', linewidth=2, label=f'k-NN Regression (k={k})')
+plt.xlabel('X (Input Feature)')
+plt.ylabel('Y (Target)')
+plt.title(f'k-Nearest Neighbors Regression (k={k})')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+Key Takeaways
+Pipeline Integration: Wrapping StandardScaler() and KNeighborsRegressor() inside make_pipeline() ensures your feature matrix is automatically scaled prior to calculating neighbor distances.
+
+1D Single Feature Scaling: Even with a single feature (
+X), scaling standardizes the input axis variance, which keeps distance metrics consistent if you expand to multi-feature datasets later.
+
+how to use the standard scalers
+
+To use StandardScaler from scikit-learn, follow the standard workflow: fit the scaler on training data, transform feature sets, and pass the scaled data to your model.
+
+Basic Usage with train_test_split
+Always fit StandardScaler only on the training set (X_train) to avoid data leakage from your test set.
+
+Python
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+
+# Example features (X) and target (y)
+X, y = np.random.rand(100, 3) * 100, np.random.randint(0, 2, 100)
+
+# 1. Split data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 2. Instantiate StandardScaler
+scaler = StandardScaler()
+
+# 3. Fit on training set AND transform it
+X_train_scaled = scaler.fit_transform(X_train)
+
+# 4. Transform test set (DO NOT call fit or fit_transform on X_test)
+X_test_scaled = scaler.transform(X_test)
+
+# 5. Train model on scaled data
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X_train_scaled, y_train)
+
+# 6. Evaluate or predict on scaled test data
+predictions = knn.predict(X_test_scaled)
+Best Practice: Pipeline Integration (Cleaner)
+Wrapping StandardScaler into a Pipeline handles fitting and transforming automatically during .fit() and .predict(), preventing data leakage and simplifying production code.
+
+Python
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsRegressor
+
+# Create pipeline
+model = make_pipeline(
+    StandardScaler(),
+    KNeighborsRegressor(n_neighbors=5)
+)
+
+# Fits scaler on X_train, then fits model on scaled X_train
+model.fit(X_train, y_train)
+
+# Scales X_test using the fitted parameters, then generates predictions
+predictions = model.predict(X_test)
+Pandas DataFrame Integration
+StandardScaler outputs NumPy arrays by default. To preserve DataFrame column names and index structures, use set_output:
+
+Python
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+# Enable pandas output format
+scaler = StandardScaler().set_output(transform="pandas")
+
+# Transform returns a DataFrame with column names intact
+X_train_scaled = scaler.fit_transform(X_train_df)
+X_test_scaled = scaler.transform(X_test_df)
+How to plot KNN regression with multiple x data
+
+When you have multiple predictor variables (
+X has 2 or more features), you cannot plot a traditional 2D single trend line (e.g., 
+y vs. 
+X) because 
+y depends on multiple dimensions simultaneously.
+
+Here are the three standard ways to visualize a k-NN regression model with multiple 
+X variables using matplotlib:
+
+Option 1: Actual vs. Predicted Values (Most Common)
+This plot shows how well your model predicts target values across all combined features. Points falling along the diagonal line indicate perfect predictions.
+
+Python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+
+# Generate sample data with 3 feature columns
+np.random.seed(42)
+X = np.random.rand(100, 3) * 10
+y = 2 * X[:, 0] + 0.5 * X[:, 1] - 1.5 * X[:, 2] + np.random.normal(0, 1, 100)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Build and fit pipeline
+model = make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=5))
+model.fit(X_train, y_train)
+
+# Predict on test set
+y_pred = model.predict(X_test)
+
+# Plot Actual vs Predicted
+plt.figure(figsize=(6, 6))
+plt.scatter(y_test, y_pred, color='blue', alpha=0.7, edgecolors='k')
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2, label='Perfect Prediction')
+
+plt.xlabel('Actual Y')
+plt.ylabel('Predicted Y')
+plt.title('Actual vs. Predicted Values (Multi-Feature KNN)')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+Option 2: Individual Subplots for Each Feature
+To observe how k-NN captures trends along each feature individually, create subplots where 
+y 
+test
+​
+  and 
+y 
+pred
+​
+  are plotted against each column of 
+X.
+
+Python
+feature_names = ['Feature 1', 'Feature 2', 'Feature 3']
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+for i in range(3):
+    # Sort indices by feature i values to get clean prediction lines
+    sort_idx = X_test[:, i].argsort()
+    
+    axes[i].scatter(X_test[:, i], y_test, color='red', alpha=0.6, label='Actual Data')
+    axes[i].plot(X_test[sort_idx, i], y_pred[sort_idx], color='blue', marker='o', markersize=4, label='KNN Prediction')
+    axes[i].set_xlabel(feature_names[i])
+    axes[i].set_ylabel('Target (Y)')
+    axes[i].legend()
+    axes[i].grid(True, linestyle='--', alpha=0.5)
+
+plt.suptitle('KNN Regression: Predictions vs. Each Feature')
+plt.tight_layout()
+plt.show()
+Option 3: 3D Surface Plot (For Exactly 2 Features)
+If you have exactly 2 predictor variables (
+X 
+1
+​
+  and 
+X 
+2
+​
+ ), you can visualize the regression decision surface in 3D.
+
+Python
+# Assuming X has exactly 2 features:
+X_2d = X[:, :2]
+
+model_2d = make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=5))
+model_2d.fit(X_2d, y)
+
+# Create a 2D meshgrid
+x1_range = np.linspace(X_2d[:, 0].min(), X_2d[:, 0].max(), 50)
+x2_range = np.linspace(X_2d[:, 1].min(), X_2d[:, 1].max(), 50)
+X1, X2 = np.meshgrid(x1_range, x2_range)
+
+# Predict across grid
+grid_points = np.c_[X1.ravel(), X2.ravel()]
+Z = model_2d.predict(grid_points).reshape(X1.shape)
+
+# 3D Plot
+fig = plt.figure(figsize=(9, 6))
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(X1, X2, Z, cmap='viridis', alpha=0.6)
+ax.scatter(X_2d[:, 0], X_2d[:, 1], y, color='red', s=30, label='Actual Data')
+
+ax.set_xlabel('Feature 1')
+ax.set_ylabel('Feature 2')
+ax.set_zlabel('Target Y')
+ax.set_title('3D KNN Regression Surface')
+plt.show()
+# Choose the number of neighbors = 'k'
+
+k  = int(input('Choose a number for k: '))
+
+
+
+# Scale the predictors because they have different units
+
+from sklearn.preprocessing import StandardScaler
+
+
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+X_test_scaled = scaler.transform(X_test)
+
+
+
+# Initiate the KNN regression model
+
+model = KNeighborsRegressor(n_neighbors=k)
+
+# Train the model using the training sets
+
+model.fit(X_train_scaled, y_train)
+
+
+
+# Compute the R-squared score on the testing data
+
+print("R-squared score: {0:.2f}".format(
+
+    model.score(X_test_scaled, y_test)))
+
+
+
+# Compute the mean squared error
+
+print('Mean squared error: %.2f'
+
+      % mean_squared_error(y_test, y_pred_knn)) 
+
+In your current code snippet, there is one critical error: y_pred_knn is never calculated before calling mean_squared_error(y_test, y_pred_knn). This will raise a NameError: name 'y_pred_knn' is not defined.
+
+You need to generate the predictions first using model.predict(X_test_scaled).
+
+Here is the corrected and complete code:
+
+Python
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_squared_error
+
+# Choose the number of neighbors = 'k'
+k = int(input('Choose a number for k: '))
+
+# Scale the predictors because they have different units
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Initiate the KNN regression model
+model = KNeighborsRegressor(n_neighbors=k)
+
+# Train the model using the training sets
+model.fit(X_train_scaled, y_train)
+
+# Generate predictions on the scaled test set
+y_pred_knn = model.predict(X_test_scaled)
+
+# Compute the R-squared score on the testing data
+print("R-squared score: {0:.2f}".format(
+    model.score(X_test_scaled, y_test)))
+
+# Compute the mean squared error
+print('Mean squared error: %.2f'
+      % mean_squared_error(y_test, y_pred_knn))
+Alternative: Using make_pipeline (Cleaner Code)
+You can streamline this logic using make_pipeline. It automatically handles scaling during both training and evaluation, removing the need to manage X_train_scaled and X_test_scaled manually:
+
+Python
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import mean_squared_error
+
+k = int(input('Choose a number for k: '))
+
+# Combine scaling and KNN model into a single pipeline
+model = make_pipeline(StandardScaler(), KNeighborsRegressor(n_neighbors=k))
+
+# Fit pipeline on unscaled training data (scaler fits automatically)
+model.fit(X_train, y_train)
+
+# Generate predictions (scaler transforms X_test automatically)
+y_pred_knn = model.predict(X_test)
+
+# Print metrics
+print("R-squared score: {0:.2f}".format(model.score(X_test, y_test)))
+print("Mean squared error: {0:.2f}".format(mean_squared_error(y_test, y_pred_knn)))
+now help to make a plot
+
+Here are two clear ways to plot your multi-predictor k-NN model using the y_pred_knn variable from your script.
+
+Option 1: Actual vs. Predicted Values (Recommended)
+This plot works regardless of how many predictor variables you have. If your model's predictions are accurate, the points will sit close to the red dashed 1:1 line.
+
+Python
+import matplotlib.pyplot as plt
+
+# Plot Actual vs Predicted
+plt.figure(figsize=(7, 5))
+plt.scatter(y_test, y_pred_knn, color='blue', alpha=0.6, edgecolors='k', label='Predictions')
+
+# Add a diagonal line representing perfect predictions
+min_val = min(y_test.min(), y_pred_knn.min())
+max_val = max(y_test.max(), y_pred_knn.max())
+plt.plot([min_val, max_val], [min_val, max_val], 'r--', lw=2, label='Perfect Fit (1:1)')
+
+plt.xlabel('Actual Target Values (y_test)')
+plt.ylabel('Predicted Target Values (y_pred)')
+plt.title(f'Actual vs. Predicted Values (k={k})')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+Option 2: Individual Subplots for Each Predictor Variable
+If you want to see how the k-NN model fits each feature column individually against the target:
+
+Python
+import matplotlib.pyplot as plt
+
+# Get the number of features in X_test
+num_features = X_test.shape[1]
+
+# Set up subplots dynamically based on feature count
+fig, axes = plt.subplots(1, num_features, figsize=(5 * num_features, 4), sharey=True)
+
+# If X_test is a pandas DataFrame, get column names; otherwise use indices
+feature_names = X_test.columns if hasattr(X_test, 'columns') else [f'Feature {i+1}' for i in range(num_features)]
+
+# Handle case when there's only 1 feature
+if num_features == 1:
+    axes = [axes]
+
+for i in range(num_features):
+    # Extract 1D array for feature i
+    x_feat = X_test.iloc[:, i] if hasattr(X_test, 'iloc') else X_test[:, i]
+    
+    # Sort indices by feature values so prediction markers render clearly
+    sort_idx = x_feat.argsort()
+    
+    axes[i].scatter(x_feat, y_test, color='red', alpha=0.5, label='Actual Data')
+    axes[i].scatter(x_feat.iloc[sort_idx] if hasattr(x_feat, 'iloc') else x_feat[sort_idx], 
+                    y_pred_knn[sort_idx], color='blue', marker='x', label='k-NN Prediction')
+    
+    axes[i].set_xlabel(feature_names[i])
+    if i == 0:
+        axes[i].set_ylabel('Target (y)')
+    axes[i].legend()
+    axes[i].grid(True, linestyle='--', alpha=0.5)
+
+plt.suptitle(f'k-NN Predictions per Feature (k={k})')
+plt.tight_layout()
+plt.show()
+How to plot non linear multi-layer perceptioon MLP regression with multiple X variables
+
+
+
+# Choose a number of hidden nodes...n = int(input('Choose a number for hidden nodes: '))# Import the necessary modules and librariesimport numpy as npimport matplotlib.pyplot as plt# Create a random datasetrng = np.random.RandomState(1)X = np.sort(5 * rng.rand(80, 1), axis=0)y = np.sin(X).ravel()y[::5] += 3 * (0.5 - rng.rand(16))# Fit regression modelregr_1 = MLPRegressor(hidden_layer_sizes=(n,n), activation='tanh', max_iter=10000)regr_1.fit(X, y)print("R-squared score: {}".format(regr_1.score(X,y)))# PredictX_test = np.arange(0.0, 5.0, 0.01)[:, np.newaxis]y_1 = regr_1.predict(X_test)# Plot the resultsplt.figure()plt.scatter(X, y, c="darkorange", label="data")plt.plot(X_test, y_1, color="cornflowerblue", label="hidden nodes="+str(n), linewidth=2)plt.xlabel("data")plt.ylabel("target")plt.title("MLP Regression")plt.legend()plt.show()
+
+To adapt your code for multiple 
+X variables, you need to account for two main changes:
+
+Data Shape: 
+X will have multiple columns (e.g., shape (80, 3) instead of (80, 1)).
+
+Visualization: You can no longer plot a single 2D curve (X_test vs y_1) across multiple dimensions simultaneously.
+
+Here are the two best plotting methods to visualize an MLP regressor with multiple features:
+
+Method 1: Actual vs. Predicted Plot (Overall Model Performance)
+This is the standard approach for evaluating regression models across any number of features. Predictions (
+y 
+pred
+​
+ ) are plotted against actual values (
+y 
+test
+​
+ ) along a 1:1 diagonal reference line.
+
+Python
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPRegressor
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+
+# 1. Choose hidden nodes
+n = int(input('Choose a number for hidden nodes: '))
+
+# 2. Generate synthetic multi-feature nonlinear data (e.g., 3 features)
+rng = np.random.RandomState(1)
+X = 5 * rng.rand(200, 3)
+# Non-linear combination of 3 features
+y = np.sin(X[:, 0]) + np.cos(X[:, 1]) + np.tanh(X[:, 2]) + 0.1 * rng.randn(200)
+
+# Split into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 3. Fit MLP Regression model (Include StandardScaler for neural networks)
+regr_1 = make_pipeline(
+    StandardScaler(),
+    MLPRegressor(hidden_layer_sizes=(n, n), activation='tanh', max_iter=10000, random_state=1)
+)
+regr_1.fit(X_train, y_train)
+
+# Print score
+print("R-squared score: {0:.2f}".format(regr_1.score(X_test, y_test)))
+
+# 4. Predict on test data
+y_pred = regr_1.predict(X_test)
+
+# 5. Plot Actual vs Predicted
+plt.figure(figsize=(7, 5))
+plt.scatter(y_test, y_pred, c="cornflowerblue", edgecolors="k", label=f"Hidden nodes = ({n}, {n})")
+
+# Add 1:1 line for perfect predictions
+min_val, max_val = min(y_test.min(), y_pred.min()), max(y_test.max(), y_pred.max())
+plt.plot([min_val, max_val], [min_val, max_val], "r--", label="Perfect Fit (1:1)")
+
+plt.xlabel("Actual Target (y_test)")
+plt.ylabel("Predicted Target (y_pred)")
+plt.title("MLP Regression: Actual vs. Predicted")
+plt.legend()
+plt.grid(True, linestyle="--", alpha=0.5)
+plt.show()
+Method 2: Partial Dependence Plots (Per Feature Response Curves)
+If you want to see how the MLP captures the non-linear curve for each individual feature while holding other features constant, use PartialDependenceDisplay from sklearn:
+
+Python
+from sklearn.inspection import PartialDependenceDisplay
+
+# Generate Partial Dependence Plots for all 3 features
+fig, ax = plt.subplots(figsize=(12, 4))
+PartialDependenceDisplay.from_estimator(
+    regr_1, 
+    X_train, 
+    features=[0, 1, 2], 
+    feature_names=["Feature 1", "Feature 2", "Feature 3"],
+    ax=ax
+)
+plt.suptitle(f"MLP Non-Linear Partial Dependence (hidden nodes = {n})")
+plt.tight_layout()
+plt.show()
+Key Highlights
+Feature Scaling: StandardScaler inside make_pipeline is crucial for Multi-Layer Perceptrons; Neural Networks fail to converge or behave erratically if input variables have unscaled or differing ranges.
+
+Partial Dependence: Plots the non-linear relationship the MLP learned for each feature independently.
+
+
+
+
+
+Your Old Dominion University chats aren’t used to improve our models. Gemini is AI and can make mistakes. Your privacy & GeminiOpens in a new window
+
