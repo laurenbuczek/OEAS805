@@ -1,0 +1,2333 @@
+
+Gemini
+
+New chat
+Library
+Images
+Scheduled
+Students
+Customize
+New notebook
+Matplotlib Horizontal Threshold Line
+Grouping Parameter Counts
+Understanding [*] in Jupyter Notebook
+Understanding Pandas DataFrame Correlation Code
+Explaining Pandas DataFrame Info Output
+Daily City Temperature EDA Breakdown
+Fixing Jupyter Nbconvert File Error
+Checking Git Repositories in Windows Terminals
+Fixing Git Add Pathspec Error
+Fixing Git Add Errors
+Fixing Git Remote Origin Error
+Updating Git Remote to SSH
+How to Rename PC Username
+Fixing Git Setup for HW1
+Fixing Git Repository and Push Setup
+Fixing Git Remote Origin Error
+Conversation with Gemini
+how do you put a line on a graph in python that is a dotted line where y = 0.90, like a htreshold line
+
+In Matplotlib, use plt.axhline() (or ax.axhline() when using subplots) to draw a horizontal threshold line across the plot. Pass y=0.90, linestyle='--' (or ':' for dots), and specify a color.
+
+Functional Example (plt interface)
+Python
+import matplotlib.pyplot as plt
+
+# Sample data
+x = [1, 2, 3, 4, 5]
+y = [0.82, 0.88, 0.91, 0.95, 0.94]
+
+plt.plot(x, y, marker='o', label='Performance')
+
+# Add the dotted horizontal threshold line at y = 0.90
+plt.axhline(y=0.90, color='r', linestyle=':', label='Threshold (0.90)')
+
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.title('Performance vs Threshold')
+plt.legend()
+plt.show()
+Object-Oriented Example (ax interface)
+Python
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+
+ax.plot([1, 2, 3, 4, 5], [0.82, 0.88, 0.91, 0.95, 0.94])
+
+# Add threshold line to specific axes instance
+ax.axhline(y=0.90, color='red', linestyle='--', linewidth=1.5, label='Threshold')
+
+ax.legend()
+plt.show()
+Key Parameters for axhline
+y: The y-axis value where the line crosses (e.g., 0.90).
+
+linestyle: Set to ':' for dotted or '--' for dashed.
+
+color: Standard color names ('red', 'black') or hex codes ('#ff0000').
+
+linewidth: Adjusts line thickness (default is 1.5).
+
+xmin / xmax: (Optional) Controls where the line starts and ends as a fraction between 0 (left) and 1 (right). Defaults to 0 and 1 (spans the entire plot).
+
+
+
+for l in l_range:
+
+    print(l)
+
+    mlp = MLPClassifier(hidden_layer_sizes=(l, l, l), max_iter=5000)
+
+    mlp.fit(X_train, y_train)
+
+    y_pred = mlp.predict(X_test)
+
+    scores[l] = metrics.accuracy_score(y_test, y_pred)
+
+    scores_list.append(metrics.accuracy_score(y_test, y_pred))
+
+
+
+how can I rewrite this so it will select the layers/neurons with accuracy scores >90
+
+To filter and store only the architectures where the accuracy score exceeds 0.90 (90%), add a conditional if statement after calculating the accuracy.
+
+Depending on your goal, you can either filter during the loop or after the loop.
+
+Option 1: Filter inside the loop
+Add an if check before storing the score in your dictionary or list.
+
+Python
+# Make sure to initialize scores, scores_list, and high_accuracy_layers before the loop
+scores = {}
+scores_list = []
+high_accuracy_layers = []
+
+for l in l_range:
+    print(l)
+    mlp = MLPClassifier(hidden_layer_sizes=(l, l, l), max_iter=5000)
+    mlp.fit(X_train, y_train)
+    
+    y_pred = mlp.predict(X_test)
+    acc = metrics.accuracy_score(y_test, y_pred)
+    
+    # Store all scores (optional, if you still want a complete history)
+    scores[l] = acc
+    scores_list.append(acc)
+    
+    # Select only configurations where accuracy > 0.90
+    if acc > 0.90:
+        high_accuracy_layers.append((l, acc))
+
+# View selected layer sizes and their scores
+print("Layer configurations with >90% accuracy:", high_accuracy_layers)
+Option 2: Record everything and filter afterwards
+If you already ran the training loop and recorded all scores into scores (a dictionary mapping l to accuracy), you can filter the results using a dictionary comprehension or filtering list:
+
+Python
+# Filter the scores dictionary after the loop completes
+selected_layers = {l: acc for l, acc in scores.items() if acc > 0.90}
+
+print("Selected layer configurations:", selected_layers)
+Option 3: Track the single best layer size
+If you want to keep track of whichever layer size l yields the highest score (or the first one to cross 0.90):
+
+Python
+best_l = None
+best_acc = 0.90  # Set minimum baseline
+
+for l in l_range:
+    print(l)
+    mlp = MLPClassifier(hidden_layer_sizes=(l, l, l), max_iter=5000)
+    mlp.fit(X_train, y_train)
+    
+    acc = metrics.accuracy_score(y_test, mlp.predict(X_test))
+    
+    if acc > best_acc:
+        best_acc = acc
+        best_l = l
+
+print(f"Best layer size above 90%: l={best_l} with accuracy={best_acc:.4f}")
+how do i make it for each one though, not just pulling out the top one
+
+To track every single layer configuration along with its specific layer tuple (l, l, l) and accuracy score above 0.90, you can store them as structured dictionaries or tuples inside a list.
+
+Option 1: Collect a list of dictionaries (Recommended)
+This creates a clean list where every entry records the neuron count l, the explicit 3-layer shape, and the accuracy score.
+
+Python
+high_accuracy_results = []
+
+for l in l_range:
+    print(l)
+    mlp = MLPClassifier(hidden_layer_sizes=(l, l, l), max_iter=5000)
+    mlp.fit(X_train, y_train)
+    
+    y_pred = mlp.predict(X_test)
+    acc = metrics.accuracy_score(y_test, y_pred)
+    
+    # Store details for EVERY configuration that passes the 0.90 threshold
+    if acc > 0.90:
+        high_accuracy_results.append({
+            'neurons_per_layer': l,
+            'layer_shape': (l, l, l),
+            'accuracy': acc
+        })
+
+# Print each matching configuration individually
+for result in high_accuracy_results:
+    print(f"Neurons: {result['neurons_per_layer']} | Architecture: {result['layer_shape']} -> Accuracy: {result['accuracy']:.4f}")
+Option 2: Filter into a dictionary of passing layers
+If you want to map each l directly to its accuracy score for easy lookup:
+
+Python
+scores = {}
+passing_scores = {}
+
+for l in l_range:
+    print(l)
+    mlp = MLPClassifier(hidden_layer_sizes=(l, l, l), max_iter=5000)
+    mlp.fit(X_train, y_train)
+    
+    acc = metrics.accuracy_score(y_test, mlp.predict(X_test))
+    
+    scores[l] = acc
+    
+    # Add to passing_scores dictionary if over 90%
+    if acc > 0.90:
+        passing_scores[l] = acc
+
+# Display each matching layer size and its score
+for layer_size, score in passing_scores.items():
+    print(f"Layer size (l={layer_size}, {layer_size}, {layer_size}): Accuracy = {score:.4f}")
+Option 3: Filter existing scores dictionary post-loop
+If you've already run the loop and saved all results in scores = {l: accuracy}, you can extract every entry above 0.90 into a new dictionary without re-running the model:
+
+Python
+# Extract all entries with accuracy > 0.90
+passing_layers = {l: score for l, score in scores.items() if score > 0.90}
+
+# Iterate through every passing layer configuration
+for l, score in passing_layers.items():
+    print(f"l={l} (hidden_layer_sizes=({l}, {l}, {l})) reached {score * 100:.2f}% accuracy")
+# here we apply the new model built above to 'new' data#0 = setosa, 1=versicolor, 2=virginicaclasses = {0:'setosa',1:'versicolor',2:'virginica'}# Make a prediction for the 'new' data # predict for the below two random observationsx_new = [[3,4,5,2],[5,4,2,2]]x_new_scaled = scaler.transform(x_new)y_predict = mlp.predict(x_new_scaled)
+
+
+
+How do I do this with new "unknown wine" data that is important as a csv?
+
+To predict classes for new "unknown wine" data loaded from a CSV file, use pandas.read_csv() to load the data, apply your pre-fitted scaler.transform(), pass the scaled features to mlp.predict(), and map the numeric predictions back to the class names.
+
+Here is the complete step-by-step workflow:
+
+Python
+import pandas as pd
+
+# 1. Load the new wine CSV file
+# Ensure the CSV contains only the feature columns in the exact order as training
+new_wine_df = pd.read_csv('unknown_wine_data.csv')
+
+# 2. Scale the new data using the ALREADY fitted scaler
+# Do NOT call fit_transform() here—only transform()
+x_new_scaled = scaler.transform(new_wine_df)
+
+# 3. Make predictions using the trained MLP classifier
+y_predict = mlp.predict(x_new_scaled)
+
+# 4. Map numeric predictions to class names
+# Adjust class names dictionary to match your wine dataset classes
+wine_classes = {0: 'Class_0', 1: 'Class_1', 2: 'Class_2'}
+predicted_names = [wine_classes[pred] for pred in y_predict]
+
+# 5. Add predictions directly back into your dataframe to review results
+new_wine_df['Predicted_Class_Numeric'] = y_predict
+new_wine_df['Predicted_Class_Name'] = predicted_names
+
+print(new_wine_df)
+Key Rules for CSV Prediction
+Do not re-fit the scaler: Use scaler.transform(new_wine_df) rather than fit_transform(). Re-fitting will overwrite the feature scaling rules learned from your training set and skew predictions.
+
+Match feature order: Ensure the columns in unknown_wine_data.csv match the exact order and count of the features used during mlp.fit().
+
+Exclude target/label columns: If your CSV already contains an ID or actual label column, separate it first: x_new = new_wine_df.drop(columns=['id', 'target']).
+
+C:\Users\laure\anaconda3\Lib\site-packages\sklearn\utils\validation.py:2820: UserWarning: X has feature names, but StandardScaler was fitted without feature names
+
+warnings.warn(
+
+---------------------------------------------------------------------------ValueError Traceback (most recent call last)Cell In[12], line 3 1 wine_classes = {0: 'Class_0', 1: 'Class_1', 2: 'Class_2'} 2 ----> 3 x_new_scaled = scaler.transform(unknown_wine) 4 y_predict = mlp.predict(x_new_scaled)File ~\anaconda3\Lib\site-packages\sklearn\utils\_set_output.py:319, in _wrap_method_output.<locals>.wrapped(self, X, *args, **kwargs) 317 @wraps(f) 318 def wrapped(self, X, *args, **kwargs):--> 319 data_to_wrap = f(self, X, *args, **kwargs) 320 if isinstance(data_to_wrap, tuple): 321 # only wrap the first output for cross decomposition 322 return_tuple = ( 323 _wrap_data_with_container(method, data_to_wrap[0], X, self), 324 *data_to_wrap[1:], 325 )File ~\anaconda3\Lib\site-packages\sklearn\preprocessing\_data.py:1111, in StandardScaler.transform(self, X, copy) 1108 check_is_fitted(self) 1110 copy = copy if copy is not None else self.copy-> 1111 X = validate_data( 1112 self, 1113 X, 1114 reset=False, 1115 accept_sparse="csr", 1116 copy=copy, 1117 dtype=supported_float_dtypes(xp, X_device), 1118 force_writeable=True, 1119 ensure_all_finite="allow-nan", 1120 ) 1122 if sparse.issparse(X): 1123 if self.with_mean:File ~\anaconda3\Lib\site-packages\sklearn\utils\validation.py:3059, in validate_data(_estimator, X, y, reset, validate_separately, skip_check_array, **check_params) 3056 out = X, y 3058 if not no_val_X and check_params.get("ensure_2d", True):-> 3059 _check_n_features(_estimator, X, reset=reset) 3061 return outFile ~\anaconda3\Lib\site-packages\sklearn\utils\validation.py:2923, in _check_n_features(estimator, X, reset) 2920 return 2922 if n_features != estimator.n_features_in_:-> 2923 raise ValueError( 2924 f"X has {n_features} features, but {estimator.__class__.__name__} " 2925 f"is expecting {estimator.n_features_in_} features as input." 2926 )ValueError: X has 14 features, but StandardScaler is expecting 13 features as input.
+
+The error and warning occur for two distinct reasons:
+
+ValueError: X has 14 features, but StandardScaler is expecting 13 features as input.
+
+Your CSV file contains 14 columns (such as an 'id', 'target', or index column), but the StandardScaler was originally fitted on 13 features. StandardScaler requires the exact same number of feature columns.
+
+UserWarning: X has feature names, but StandardScaler was fitted without feature names
+
+Your training data was passed as a NumPy array (or without column names), but unknown_wine is a Pandas DataFrame with column headers.
+
+Solution
+Pass only the raw 13 feature values as a NumPy array using .values or by dropping unnecessary non-feature columns:
+
+Option A: Extract values and slice out extra columns (Most common fix)
+If your CSV includes an unwanted extra column (like an ID column at index 0 or a target column at the end), slice or drop it first:
+
+Python
+# Check your column names to identify the extra column
+print(unknown_wine.columns)
+
+# If an extra ID column is present, drop it by name:
+# X_new = unknown_wine.drop(columns=['id'])
+
+# OR if you just need the first 13 columns as a raw NumPy array:
+X_new_array = unknown_wine.iloc[:, :13].values
+
+# Now transform and predict
+x_new_scaled = scaler.transform(X_new_array)
+y_predict = mlp.predict(x_new_scaled)
+Option B: Convert the entire DataFrame directly to .values
+If unknown_wine actually has 13 features but includes headers, converting it to a NumPy array via .values clears the warning:
+
+Python
+# Pass as a NumPy array to suppress the UserWarning and transform
+x_new_scaled = scaler.transform(unknown_wine.values)
+y_predict = mlp.predict(x_new_scaled)
+(Note: Option B will still throw a ValueError if unknown_wine has 14 columns, so make sure to drop or slice out the 14th column as shown in Option A).
+
+we just dont have target
+
+Since there is no target column in unknown_wine, the 14th column in your CSV is likely an extra index, ID, or unnamed column (such as Unnamed: 0) created when saving the CSV.
+
+Check the column names in your DataFrame to identify the extra column:
+
+Python
+print(unknown_wine.columns.tolist())
+How to Fix
+Option 1: Drop an extra Index or ID column by name
+If print(unknown_wine.columns) shows an unwanted column like 'id' or 'Unnamed: 0':
+
+Python
+# Drop the extra column and pass as a NumPy array (.values fixes the UserWarning)
+X_new = unknown_wine.drop(columns=['Unnamed: 0']).values
+
+x_new_scaled = scaler.transform(X_new)
+y_predict = mlp.predict(x_new_scaled)
+Option 2: Select only the first 13 feature columns
+If you know the actual wine features are the first 13 columns in the file:
+
+Python
+# Slice the first 13 columns and convert directly to a NumPy array
+X_new = unknown_wine.iloc[:, :13].values
+
+x_new_scaled = scaler.transform(X_new)
+y_predict = mlp.predict(x_new_scaled)
+Converting to .values in both options resolves both issues at once: it strips out the extra 14th column and clears the UserWarning regarding feature names.
+
+how do I delete a column in my data in python but .copy()
+
+To delete a column while preserving your original DataFrame using .copy(), explicitly call .copy() when assigning the modified DataFrame or before running .drop().
+
+Here are the two ways to do it in Pandas:
+
+Method 1: Drop the column on a copied DataFrame (Recommended)
+Make a fresh copy of your DataFrame first, then drop the column from the new copy. This leaves your original DataFrame (df) completely untouched.
+
+Python
+import pandas as pd
+
+# Create a clean copy of the original DataFrame
+df_cleaned = df.copy()
+
+# Drop the column from the new DataFrame
+df_cleaned = df_cleaned.drop(columns=['column_to_delete'])
+Method 2: One-liner using .copy()
+You can chain .drop() and .copy() together in a single line:
+
+Python
+# Create a new DataFrame with the column removed and copied in memory
+df_cleaned = df.drop(columns=['column_name']).copy()
+Method 3: Keep specific columns instead of dropping
+If you have many columns and only want to keep the 13 feature columns (for example, from your wine dataset), slice the columns and call .copy():
+
+Python
+# Keep only the first 13 columns as a new DataFrame copy
+X_new = df.iloc[:, :13].copy()
+Why use .copy() here?
+Using .copy() creates an independent dataset in memory. This prevents Pandas from throwing a SettingWithCopyWarning when you modify df_cleaned later in your pipeline.
+
+I cant get this to work
+
+The error AttributeError: 'numpy.ndarray' object has no attribute 'target_names' occurs because the variable wine has been overwritten as a NumPy array (from your feature matrix X_test), replacing scikit-learn's original wine dataset object.
+
+Furthermore, cell [18] is fitting and predicting on X_test instead of using your newly prepared unknown_wine_cleaned data.
+
+The Corrected Code Block
+Here is the fixed version of your cell to predict on unknown_wine_cleaned:
+
+Python
+# 1. Scale the cleaned new wine data
+x_new_scaled = scaler.transform(unknown_wine_cleaned.values)
+
+# 2. Fit your model on training data and predict probabilities for the unknown wine
+mlp_final = MLPClassifier(hidden_layer_sizes=(4, 4, 4), max_iter=5000, random_state=42)
+mlp_final.fit(X_train, y_train)
+
+probs = mlp_final.predict_proba(x_new_scaled)
+preds = mlp_final.predict(x_new_scaled)
+
+# 3. Define class names manually (or use target_names from your dataset loader, e.g., dataset.target_names)
+target_names = ['setosa', 'versicolor', 'virginica']  # Adjust names if needed for your wine classes
+
+# 4. Display results for each unknown wine sample
+print("Sample probabilities for each unknown wine:")
+for i, prob_row in enumerate(probs):
+    print(f"\nUnknown wine {i+1} (Predicted: {target_names[preds[i]]}):")
+    for j, class_name in enumerate(target_names):
+        print(f"  Class {class_name}: {prob_row[j]:.4f}")
+What Went Wrong
+Variable Shadowing: In the line for i, wine in enumerate(X_test):, you assigned each row of X_test to the variable name wine. This overwrote the original scikit-learn wine dataset object, causing wine.target_names to fail on line 1.
+
+Wrong Dataset Passed: To apply the model to the unknown CSV data (as stated in your heading), pass x_new_scaled (derived from unknown_wine_cleaned) to .predict_proba() and .predict(), rather than X_test.
+
+Use the final version of your model, developed using the steps above, to predict the class for the ‘unknown’ samples found in the unknown_wine.csv file in the data folder on the class GitHub page.
+
+Find a scikit-learn function that will give the probability that each unknown wine fits into each of one of the three target classes. List the probabilities for each unknown sample for each target class and comment on your results.
+
+Here is the complete code to scale unknown_wine_cleaned, compute class predictions and class probabilities using predict_proba(), display the results clearly, and provide the required commentary:
+
+Python
+# 1. Scale the unknown wine data (using .values to avoid feature name warnings)
+X_unknown_scaled = scaler.transform(unknown_wine_cleaned.values)
+
+# 2. Train the final model on full training data
+mlp_final = MLPClassifier(hidden_layer_sizes=(4, 4, 4), max_iter=5000, random_state=42)
+mlp_final.fit(X_train, y_train)
+
+# 3. Predict predicted classes and probabilities for each unknown sample
+# predict_proba() gives the probability distribution across all 3 classes
+unknown_probs = mlp_final.predict_proba(X_unknown_scaled)
+unknown_preds = mlp_final.predict(X_unknown_scaled)
+
+# Class name mapping (0, 1, 2)
+class_names = ['Class 0', 'Class 1', 'Class 2']
+
+# 4. Display the probabilities for each sample
+print("--- Prediction Probabilities for Unknown Wine Samples ---")
+for i, (probs, pred) in enumerate(zip(unknown_probs, unknown_preds)):
+    print(f"\nUnknown Sample {i+1} (Predicted Class: {class_names[pred]}):")
+    for j, class_name in enumerate(class_names):
+        print(f"  Probability of {class_name}: {probs[j]:.4f} ({probs[j]*100:.2f}%)")
+Key Scikit-Learn Function Used
+mlp_final.predict_proba(X): This scikit-learn method computes the soft output probabilities for each target class instead of just returning a single hard prediction. The outputs for each sample sum to 
+1.0 (
+100%).
+
+How to Comment on Your Results
+When analyzing the output probabilities in your report or notebook, consider these guidelines:
+
+Prediction Certainty / Confidence:
+
+High Confidence: If a sample has a primary class probability near 
+1.0 (e.g., 
+98.5% Class 0, 
+1.0% Class 1, 
+0.5% Class 2), state that the model is highly confident in its classification.
+
+Uncertain / Borderline Cases: If a sample has split probabilities (e.g., 
+52% Class 1 and 
+45% Class 2), note that the observation lies near the decision boundary between those two classes.
+
+Practical Business / Wine Context:
+
+Explain that probability scores provide more actionable insight than binary classification alone. For example, high-confidence predictions can be automatically sorted, while low-confidence predictions can be flagged for human re-testing or laboratory verification.
+
+Sample probabilities for each unknown wine:
+
+
+
+Unknown wine 1 (Predicted: setosa):
+
+Class setosa: 0.9995
+
+Class versicolor: 0.0005
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 2 (Predicted: setosa):
+
+Class setosa: 0.9841
+
+Class versicolor: 0.0159
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 3 (Predicted: setosa):
+
+Class setosa: 0.9990
+
+Class versicolor: 0.0010
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 4 (Predicted: setosa):
+
+Class setosa: 0.9965
+
+Class versicolor: 0.0035
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 5 (Predicted: setosa):
+
+Class setosa: 0.9961
+
+Class versicolor: 0.0039
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 6 (Predicted: setosa):
+
+Class setosa: 0.9845
+
+Class versicolor: 0.0155
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 7 (Predicted: setosa):
+
+Class setosa: 0.9979
+
+Class versicolor: 0.0021
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 8 (Predicted: setosa):
+
+Class setosa: 0.9978
+
+Class versicolor: 0.0022
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 9 (Predicted: setosa):
+
+Class setosa: 0.9978
+
+Class versicolor: 0.0022
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 10 (Predicted: setosa):
+
+Class setosa: 0.9835
+
+Class versicolor: 0.0165
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 11 (Predicted: setosa):
+
+Class setosa: 0.9988
+
+Class versicolor: 0.0012
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 12 (Predicted: setosa):
+
+Class setosa: 0.9865
+
+Class versicolor: 0.0135
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 13 (Predicted: setosa):
+
+Class setosa: 0.9980
+
+Class versicolor: 0.0020
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 14 (Predicted: setosa):
+
+Class setosa: 0.9990
+
+Class versicolor: 0.0010
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 15 (Predicted: setosa):
+
+Class setosa: 0.9597
+
+Class versicolor: 0.0403
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 16 (Predicted: setosa):
+
+Class setosa: 0.9994
+
+Class versicolor: 0.0006
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 17 (Predicted: setosa):
+
+Class setosa: 0.9971
+
+Class versicolor: 0.0029
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 18 (Predicted: setosa):
+
+Class setosa: 0.9996
+
+Class versicolor: 0.0004
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 19 (Predicted: setosa):
+
+Class setosa: 0.9973
+
+Class versicolor: 0.0027
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 20 (Predicted: setosa):
+
+Class setosa: 0.8562
+
+Class versicolor: 0.1437
+
+Class virginica: 0.0001
+
+
+
+Unknown wine 21 (Predicted: setosa):
+
+Class setosa: 0.9974
+
+Class versicolor: 0.0026
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 22 (Predicted: setosa):
+
+Class setosa: 0.9882
+
+Class versicolor: 0.0118
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 23 (Predicted: setosa):
+
+Class setosa: 0.9835
+
+Class versicolor: 0.0165
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 24 (Predicted: setosa):
+
+Class setosa: 0.9990
+
+Class versicolor: 0.0010
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 25 (Predicted: setosa):
+
+Class setosa: 0.9873
+
+Class versicolor: 0.0127
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 26 (Predicted: setosa):
+
+Class setosa: 0.9988
+
+Class versicolor: 0.0012
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 27 (Predicted: setosa):
+
+Class setosa: 0.9467
+
+Class versicolor: 0.0533
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 28 (Predicted: setosa):
+
+Class setosa: 0.9959
+
+Class versicolor: 0.0041
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 29 (Predicted: setosa):
+
+Class setosa: 0.9963
+
+Class versicolor: 0.0037
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 30 (Predicted: setosa):
+
+Class setosa: 0.9955
+
+Class versicolor: 0.0045
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 31 (Predicted: setosa):
+
+Class setosa: 0.9953
+
+Class versicolor: 0.0047
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 32 (Predicted: setosa):
+
+Class setosa: 0.9841
+
+Class versicolor: 0.0159
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 33 (Predicted: setosa):
+
+Class setosa: 0.9965
+
+Class versicolor: 0.0035
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 34 (Predicted: setosa):
+
+Class setosa: 0.9972
+
+Class versicolor: 0.0028
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 35 (Predicted: setosa):
+
+Class setosa: 0.9945
+
+Class versicolor: 0.0055
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 36 (Predicted: setosa):
+
+Class setosa: 0.9899
+
+Class versicolor: 0.0101
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 37 (Predicted: setosa):
+
+Class setosa: 0.9993
+
+Class versicolor: 0.0007
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 38 (Predicted: setosa):
+
+Class setosa: 0.9970
+
+Class versicolor: 0.0030
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 39 (Predicted: setosa):
+
+Class setosa: 0.9982
+
+Class versicolor: 0.0018
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 40 (Predicted: setosa):
+
+Class setosa: 0.9997
+
+Class versicolor: 0.0003
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 41 (Predicted: setosa):
+
+Class setosa: 0.9850
+
+Class versicolor: 0.0150
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 42 (Predicted: setosa):
+
+Class setosa: 0.9991
+
+Class versicolor: 0.0009
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 43 (Predicted: setosa):
+
+Class setosa: 0.9960
+
+Class versicolor: 0.0040
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 44 (Predicted: setosa):
+
+Class setosa: 0.9984
+
+Class versicolor: 0.0016
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 45 (Predicted: setosa):
+
+Class setosa: 0.9980
+
+Class versicolor: 0.0020
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 46 (Predicted: setosa):
+
+Class setosa: 0.9985
+
+Class versicolor: 0.0015
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 47 (Predicted: setosa):
+
+Class setosa: 0.9907
+
+Class versicolor: 0.0093
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 48 (Predicted: setosa):
+
+Class setosa: 0.9997
+
+Class versicolor: 0.0003
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 49 (Predicted: setosa):
+
+Class setosa: 0.9997
+
+Class versicolor: 0.0003
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 50 (Predicted: setosa):
+
+Class setosa: 0.9997
+
+Class versicolor: 0.0003
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 51 (Predicted: setosa):
+
+Class setosa: 0.9983
+
+Class versicolor: 0.0017
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 52 (Predicted: setosa):
+
+Class setosa: 0.9876
+
+Class versicolor: 0.0124
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 53 (Predicted: setosa):
+
+Class setosa: 0.9785
+
+Class versicolor: 0.0215
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 54 (Predicted: setosa):
+
+Class setosa: 0.9998
+
+Class versicolor: 0.0002
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 55 (Predicted: setosa):
+
+Class setosa: 0.9988
+
+Class versicolor: 0.0012
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 56 (Predicted: setosa):
+
+Class setosa: 0.9957
+
+Class versicolor: 0.0043
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 57 (Predicted: setosa):
+
+Class setosa: 0.9994
+
+Class versicolor: 0.0006
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 58 (Predicted: setosa):
+
+Class setosa: 0.9954
+
+Class versicolor: 0.0046
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 59 (Predicted: setosa):
+
+Class setosa: 0.9949
+
+Class versicolor: 0.0051
+
+Class virginica: 0.0000
+
+
+
+Unknown wine 60 (Predicted: versicolor):
+
+Class setosa: 0.0063
+
+Class versicolor: 0.9843
+
+Class virginica: 0.0094
+
+
+
+Unknown wine 61 (Predicted: versicolor):
+
+Class setosa: 0.0119
+
+Class versicolor: 0.9760
+
+Class virginica: 0.0120
+
+
+
+Unknown wine 62 (Predicted: versicolor):
+
+Class setosa: 0.0012
+
+Class versicolor: 0.9937
+
+Class virginica: 0.0050
+
+
+
+Unknown wine 63 (Predicted: versicolor):
+
+Class setosa: 0.0016
+
+Class versicolor: 0.9929
+
+Class virginica: 0.0055
+
+
+
+Unknown wine 64 (Predicted: versicolor):
+
+Class setosa: 0.0008
+
+Class versicolor: 0.9951
+
+Class virginica: 0.0041
+
+
+
+Unknown wine 65 (Predicted: versicolor):
+
+Class setosa: 0.0106
+
+Class versicolor: 0.9778
+
+Class virginica: 0.0115
+
+
+
+Unknown wine 66 (Predicted: versicolor):
+
+Class setosa: 0.0116
+
+Class versicolor: 0.9874
+
+Class virginica: 0.0009
+
+
+
+Unknown wine 67 (Predicted: versicolor):
+
+Class setosa: 0.0011
+
+Class versicolor: 0.9942
+
+Class virginica: 0.0047
+
+
+
+Unknown wine 68 (Predicted: versicolor):
+
+Class setosa: 0.0037
+
+Class versicolor: 0.9885
+
+Class virginica: 0.0077
+
+
+
+Unknown wine 69 (Predicted: versicolor):
+
+Class setosa: 0.0015
+
+Class versicolor: 0.9930
+
+Class virginica: 0.0055
+
+
+
+Unknown wine 70 (Predicted: versicolor):
+
+Class setosa: 0.0074
+
+Class versicolor: 0.9910
+
+Class virginica: 0.0016
+
+
+
+Unknown wine 71 (Predicted: versicolor):
+
+Class setosa: 0.0062
+
+Class versicolor: 0.9845
+
+Class virginica: 0.0093
+
+
+
+Unknown wine 72 (Predicted: versicolor):
+
+Class setosa: 0.0520
+
+Class versicolor: 0.9273
+
+Class virginica: 0.0207
+
+
+
+Unknown wine 73 (Predicted: versicolor):
+
+Class setosa: 0.0246
+
+Class versicolor: 0.9741
+
+Class virginica: 0.0014
+
+
+
+Unknown wine 74 (Predicted: versicolor):
+
+Class setosa: 0.0021
+
+Class versicolor: 0.9918
+
+Class virginica: 0.0062
+
+
+
+Unknown wine 75 (Predicted: versicolor):
+
+Class setosa: 0.0023
+
+Class versicolor: 0.9913
+
+Class virginica: 0.0064
+
+
+
+Unknown wine 76 (Predicted: versicolor):
+
+Class setosa: 0.0099
+
+Class versicolor: 0.9789
+
+Class virginica: 0.0112
+
+
+
+Unknown wine 77 (Predicted: versicolor):
+
+Class setosa: 0.0009
+
+Class versicolor: 0.9948
+
+Class virginica: 0.0044
+
+
+
+Unknown wine 78 (Predicted: versicolor):
+
+Class setosa: 0.0011
+
+Class versicolor: 0.9942
+
+Class virginica: 0.0047
+
+
+
+Unknown wine 79 (Predicted: versicolor):
+
+Class setosa: 0.0234
+
+Class versicolor: 0.9578
+
+Class virginica: 0.0188
+
+
+
+Unknown wine 80 (Predicted: versicolor):
+
+Class setosa: 0.0007
+
+Class versicolor: 0.9952
+
+Class virginica: 0.0041
+
+
+
+Unknown wine 81 (Predicted: versicolor):
+
+Class setosa: 0.0844
+
+Class versicolor: 0.9021
+
+Class virginica: 0.0135
+
+
+
+Unknown wine 82 (Predicted: versicolor):
+
+Class setosa: 0.0075
+
+Class versicolor: 0.9824
+
+Class virginica: 0.0101
+
+
+
+Unknown wine 83 (Predicted: versicolor):
+
+Class setosa: 0.0009
+
+Class versicolor: 0.9975
+
+Class virginica: 0.0017
+
+
+
+Unknown wine 84 (Predicted: versicolor):
+
+Class setosa: 0.0267
+
+Class versicolor: 0.9711
+
+Class virginica: 0.0022
+
+
+
+Unknown wine 85 (Predicted: versicolor):
+
+Class setosa: 0.0454
+
+Class versicolor: 0.9544
+
+Class virginica: 0.0002
+
+
+
+Unknown wine 86 (Predicted: versicolor):
+
+Class setosa: 0.0043
+
+Class versicolor: 0.9875
+
+Class virginica: 0.0081
+
+
+
+Unknown wine 87 (Predicted: versicolor):
+
+Class setosa: 0.0012
+
+Class versicolor: 0.9938
+
+Class virginica: 0.0050
+
+
+
+Unknown wine 88 (Predicted: versicolor):
+
+Class setosa: 0.0092
+
+Class versicolor: 0.9863
+
+Class virginica: 0.0044
+
+
+
+Unknown wine 89 (Predicted: versicolor):
+
+Class setosa: 0.0037
+
+Class versicolor: 0.9946
+
+Class virginica: 0.0016
+
+
+
+Unknown wine 90 (Predicted: versicolor):
+
+Class setosa: 0.0025
+
+Class versicolor: 0.9909
+
+Class virginica: 0.0066
+
+
+
+Unknown wine 91 (Predicted: versicolor):
+
+Class setosa: 0.0127
+
+Class versicolor: 0.9749
+
+Class virginica: 0.0123
+
+
+
+Unknown wine 92 (Predicted: versicolor):
+
+Class setosa: 0.0011
+
+Class versicolor: 0.9941
+
+Class virginica: 0.0048
+
+
+
+Unknown wine 93 (Predicted: versicolor):
+
+Class setosa: 0.1026
+
+Class versicolor: 0.8563
+
+Class virginica: 0.0411
+
+
+
+Unknown wine 94 (Predicted: versicolor):
+
+Class setosa: 0.0241
+
+Class versicolor: 0.9603
+
+Class virginica: 0.0156
+
+
+
+Unknown wine 95 (Predicted: versicolor):
+
+Class setosa: 0.0136
+
+Class versicolor: 0.9860
+
+Class virginica: 0.0005
+
+
+
+Unknown wine 96 (Predicted: versicolor):
+
+Class setosa: 0.0016
+
+Class versicolor: 0.9940
+
+Class virginica: 0.0044
+
+
+
+Unknown wine 97 (Predicted: versicolor):
+
+Class setosa: 0.0022
+
+Class versicolor: 0.9936
+
+Class virginica: 0.0041
+
+
+
+Unknown wine 98 (Predicted: versicolor):
+
+Class setosa: 0.0111
+
+Class versicolor: 0.9772
+
+Class virginica: 0.0117
+
+
+
+Unknown wine 99 (Predicted: versicolor):
+
+Class setosa: 0.0298
+
+Class versicolor: 0.9595
+
+Class virginica: 0.0107
+
+
+
+Unknown wine 100 (Predicted: versicolor):
+
+Class setosa: 0.0021
+
+Class versicolor: 0.9918
+
+Class virginica: 0.0061
+
+
+
+Unknown wine 101 (Predicted: versicolor):
+
+Class setosa: 0.0034
+
+Class versicolor: 0.9891
+
+Class virginica: 0.0074
+
+
+
+Unknown wine 102 (Predicted: versicolor):
+
+Class setosa: 0.0045
+
+Class versicolor: 0.9872
+
+Class virginica: 0.0083
+
+
+
+Unknown wine 103 (Predicted: versicolor):
+
+Class setosa: 0.0027
+
+Class versicolor: 0.9905
+
+Class virginica: 0.0068
+
+
+
+Unknown wine 104 (Predicted: versicolor):
+
+Class setosa: 0.0154
+
+Class versicolor: 0.9714
+
+Class virginica: 0.0132
+
+
+
+Unknown wine 105 (Predicted: versicolor):
+
+Class setosa: 0.0071
+
+Class versicolor: 0.9848
+
+Class virginica: 0.0081
+
+
+
+Unknown wine 106 (Predicted: versicolor):
+
+Class setosa: 0.0070
+
+Class versicolor: 0.9909
+
+Class virginica: 0.0021
+
+
+
+Unknown wine 107 (Predicted: versicolor):
+
+Class setosa: 0.0037
+
+Class versicolor: 0.9886
+
+Class virginica: 0.0077
+
+
+
+Unknown wine 108 (Predicted: versicolor):
+
+Class setosa: 0.0021
+
+Class versicolor: 0.9917
+
+Class virginica: 0.0062
+
+
+
+Unknown wine 109 (Predicted: versicolor):
+
+Class setosa: 0.0003
+
+Class versicolor: 0.9966
+
+Class virginica: 0.0030
+
+
+
+Unknown wine 110 (Predicted: versicolor):
+
+Class setosa: 0.0036
+
+Class versicolor: 0.9889
+
+Class virginica: 0.0076
+
+
+
+Unknown wine 111 (Predicted: versicolor):
+
+Class setosa: 0.0044
+
+Class versicolor: 0.9874
+
+Class virginica: 0.0082
+
+
+
+Unknown wine 112 (Predicted: versicolor):
+
+Class setosa: 0.0019
+
+Class versicolor: 0.9921
+
+Class virginica: 0.0060
+
+
+
+Unknown wine 113 (Predicted: versicolor):
+
+Class setosa: 0.0040
+
+Class versicolor: 0.9882
+
+Class virginica: 0.0079
+
+
+
+Unknown wine 114 (Predicted: versicolor):
+
+Class setosa: 0.0005
+
+Class versicolor: 0.9961
+
+Class virginica: 0.0034
+
+
+
+Unknown wine 115 (Predicted: versicolor):
+
+Class setosa: 0.0141
+
+Class versicolor: 0.9731
+
+Class virginica: 0.0128
+
+
+
+Unknown wine 116 (Predicted: versicolor):
+
+Class setosa: 0.0003
+
+Class versicolor: 0.9966
+
+Class virginica: 0.0031
+
+
+
+Unknown wine 117 (Predicted: versicolor):
+
+Class setosa: 0.0007
+
+Class versicolor: 0.9952
+
+Class virginica: 0.0041
+
+
+
+Unknown wine 118 (Predicted: versicolor):
+
+Class setosa: 0.0019
+
+Class versicolor: 0.9921
+
+Class virginica: 0.0059
+
+
+
+Unknown wine 119 (Predicted: versicolor):
+
+Class setosa: 0.0043
+
+Class versicolor: 0.9910
+
+Class virginica: 0.0047
+
+
+
+Unknown wine 120 (Predicted: versicolor):
+
+Class setosa: 0.0213
+
+Class versicolor: 0.9638
+
+Class virginica: 0.0149
+
+
+
+Unknown wine 121 (Predicted: versicolor):
+
+Class setosa: 0.0007
+
+Class versicolor: 0.9953
+
+Class virginica: 0.0040
+
+
+
+Unknown wine 122 (Predicted: versicolor):
+
+Class setosa: 0.0040
+
+Class versicolor: 0.9881
+
+Class virginica: 0.0079
+
+
+
+Unknown wine 123 (Predicted: versicolor):
+
+Class setosa: 0.0243
+
+Class versicolor: 0.9600
+
+Class virginica: 0.0157
+
+
+
+Unknown wine 124 (Predicted: versicolor):
+
+Class setosa: 0.0017
+
+Class versicolor: 0.9926
+
+Class virginica: 0.0057
+
+
+
+Unknown wine 125 (Predicted: versicolor):
+
+Class setosa: 0.0142
+
+Class versicolor: 0.9730
+
+Class virginica: 0.0128
+
+
+
+Unknown wine 126 (Predicted: versicolor):
+
+Class setosa: 0.0060
+
+Class versicolor: 0.9847
+
+Class virginica: 0.0093
+
+
+
+Unknown wine 127 (Predicted: versicolor):
+
+Class setosa: 0.0268
+
+Class versicolor: 0.8915
+
+Class virginica: 0.0817
+
+
+
+Unknown wine 128 (Predicted: versicolor):
+
+Class setosa: 0.0044
+
+Class versicolor: 0.9875
+
+Class virginica: 0.0082
+
+
+
+Unknown wine 129 (Predicted: versicolor):
+
+Class setosa: 0.1026
+
+Class versicolor: 0.8563
+
+Class virginica: 0.0411
+
+
+
+Unknown wine 130 (Predicted: versicolor):
+
+Class setosa: 0.0044
+
+Class versicolor: 0.9916
+
+Class virginica: 0.0040
+
+
+
+Unknown wine 131 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 132 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 133 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 134 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 135 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 136 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 137 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 138 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 139 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 140 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 141 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 142 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 143 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 144 (Predicted: virginica):
+
+Class setosa: 0.0030
+
+Class versicolor: 0.0483
+
+Class virginica: 0.9487
+
+
+
+Unknown wine 145 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 146 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 147 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 148 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 149 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 150 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 151 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 152 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 153 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 154 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 155 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 156 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 157 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 158 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 159 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 160 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 161 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 162 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 163 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 164 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 165 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 166 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 167 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 168 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 169 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 170 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 171 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 172 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 173 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 174 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 175 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 176 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 177 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+
+
+Unknown wine 178 (Predicted: virginica):
+
+Class setosa: 0.0029
+
+Class versicolor: 0.0472
+
+Class virginica: 0.9499
+
+Key Observations & Results Summary
+Scikit-Learn Function: predict_proba() was used to derive the soft classification probabilities across all three target classes.
+
+Overall Model Performance: The model assigns strong primary class membership to almost every single sample in the dataset, demonstrating distinct separation across all three categories.
+
+Class 0 (Setosa / Class 0): Samples 1 through 59 are classified as Setosa with exceptionally high confidence (mostly 
+>98%, peaking at 
+99.98% for Sample 54). Sample 20 shows the lowest relative certainty in this cluster at 
+85.62% Setosa and 
+14.37% Versicolor.
+
+Class 1 (Versicolor / Class 1): Samples 60 through 130 belong to Versicolor. Most predictions fall between 
+95% and 
+99.7% probability. Samples 93 and 129 show the lowest confidence at 
+85.63% Versicolor, with a minor 
+10.26% shift toward Setosa.
+
+Class 2 (Virginica / Class 2): Samples 131 through 178 are identified as Virginica with extremely uniform probabilities (~
+94.99% for Virginica and ~
+4.72% for Versicolor).
+
+Detailed Discussion of Results
+High Model Certainty & Margin of Confidence:
+
+Across all 178 unlabelled observations, the model makes unambiguous predictions. The majority of samples exceed 
+95% probability for their predicted class, indicating that the feature values for these unknown samples sit well away from the decision boundaries established by the multi-layer perceptron (MLP).
+
+Boundary / Borderline Analysis:
+
+Only a tiny fraction of samples display slight boundary ambiguity:
+
+Sample 20: Setosa (
+85.62%) vs. Versicolor (
+14.37%)
+
+Sample 93 & Sample 129: Versicolor (
+85.63%) vs. Setosa (
+10.26%)
+
+Sample 127: Versicolor (
+89.15%) vs. Virginica (
+8.17%)
+
+These slight drops in probability indicate slight overlap in specific chemical features (such as alcohol content, color intensity, or flavanoids) with neighboring classes, though the model still comfortably identifies the dominant class.
+
+Noticeable Uniformity in Class 2 (Virginica):
+
+The identical output probabilities across nearly all Virginica samples (~
+0.9499) suggest that the neural network's final softmax output layer saturates when processing feature vectors in that regions of the vector space.
+
+Class Name Mapping Note:
+
+The output labels show setosa, versicolor, and virginica (which originate from scikit-learn's Iris dataset default strings used in earlier cells). For the Wine dataset, these numeric classes mapping (0, 1, 2) correspond directly to Class_0, Class_1, and Class_2 (or specific cultivars/grape varieties).
+
+
+
+
+
+Your Old Dominion University chats aren’t used to improve our models. Gemini is AI and can make mistakes. Your privacy & GeminiOpens in a new window
+
+
+
+Copilot Search Branding
+
+Like
+
+Dislike
+Getting Class Probabilities for Unknown Wines in scikit-learn
+Use a probabilistic classifier (e.g., LogisticRegression or DecisionTreeClassifier) and call predict_proba() to obtain the probability of each unknown wine belonging to each of the three wine classes 
+Stack Overflow
+Stack Overflow
++1
+.
+
+Step-by-step example
+Python
+
+Copy
+from sklearn.datasets import load_wine
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import numpy as np
+import pandas as pd
+
+# Load the wine dataset
+wine = load_wine()
+X, y = wine.data, wine.target
+target_names = wine.target_names
+
+# Split into train/test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train a probabilistic classifier
+clf = LogisticRegression(max_iter=1000)
+clf.fit(X_train, y_train)
+
+# Get probabilities for each class
+probs = clf.predict_proba(X_test)
+
+# Display results
+print("Class names:", target_names)
+print("\nSample probabilities for each test wine:")
+for i, wine in enumerate(X_test):
+    print(f"Unknown wine {i+1}:")
+    for j, class_name in enumerate(target_names):
+        print(f"  Class {class_name}: {probs[i, j]:.4f}")
